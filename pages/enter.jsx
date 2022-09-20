@@ -1,9 +1,9 @@
-import { auth, firestore, googleAuthProvider } from '@lib/firebase';
-import { UserContext } from '@lib/context';
-import Metatags from '@components/Metatags';
+import { auth, firestore, googleAuthProvider } from "@lib/firebase";
+import { UserContext } from "@lib/context";
+import Metatags from "@components/Metatags";
 
-import { useEffect, useState, useCallback, useContext } from 'react';
-import debounce from 'lodash.debounce';
+import { useEffect, useState, useCallback, useContext } from "react";
+import debounce from "lodash.debounce";
 
 export default function Enter(props) {
   const { user, username } = useContext(UserContext);
@@ -14,7 +14,15 @@ export default function Enter(props) {
   return (
     <main>
       <Metatags title="Enter" description="Sign up for this amazing app!" />
-      {user ? !username ? <UsernameForm /> : <SignOutButton /> : <SignInButton />}
+      {user ? (
+        !username ? (
+          <UsernameForm />
+        ) : (
+          <SignOutButton />
+        )
+      ) : (
+        <SignInButton />
+      )}
     </main>
   );
 }
@@ -28,11 +36,11 @@ function SignInButton() {
   return (
     <>
       <button className="btn-google" onClick={signInWithGoogle}>
-        <img src={'/google.png'} width="30px" /> Sign in with Google
+        <img src={"/google.png"} width="30px" /> Sign in with Google
       </button>
-      <button onClick={() => auth.signInAnonymously()}>
+      {/* <button onClick={() => auth.signInAnonymously()}>
         Sign in Anonymously
-      </button>
+      </button> */}
     </>
   );
 }
@@ -44,7 +52,7 @@ function SignOutButton() {
 
 // Username form
 function UsernameForm() {
-  const [formValue, setFormValue] = useState('');
+  const [formValue, setFormValue] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -59,7 +67,11 @@ function UsernameForm() {
 
     // Commit both docs together as a batch write.
     const batch = firestore.batch();
-    batch.set(userDoc, { username: formValue, photoURL: user.photoURL, displayName: user.displayName });
+    batch.set(userDoc, {
+      username: formValue,
+      photoURL: user.photoURL,
+      displayName: user.displayName,
+    });
     batch.set(usernameDoc, { uid: user.uid });
 
     await batch.commit();
@@ -97,7 +109,7 @@ function UsernameForm() {
       if (username.length >= 3) {
         const ref = firestore.doc(`usernames/${username}`);
         const { exists } = await ref.get();
-        console.log('Firestore read executed!');
+        console.log("Firestore read executed!");
         setIsValid(!exists);
         setLoading(false);
       }
@@ -110,8 +122,17 @@ function UsernameForm() {
       <section>
         <h3>Choose Username</h3>
         <form onSubmit={onSubmit}>
-          <input name="username" placeholder="myname" value={formValue} onChange={onChange} />
-          <UsernameMessage username={formValue} isValid={isValid} loading={loading} />
+          <input
+            name="username"
+            placeholder="myname"
+            value={formValue}
+            onChange={onChange}
+          />
+          <UsernameMessage
+            username={formValue}
+            isValid={isValid}
+            loading={loading}
+          />
           <button type="submit" className="btn-green" disabled={!isValid}>
             Choose
           </button>
